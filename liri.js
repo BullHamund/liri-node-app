@@ -26,7 +26,7 @@ userQuery = userQuery.join(" ");
 
 function concertThis(userQuery) {
     var queryNormalize = userQuery.split(" ").join("%20");
-    var queryUrl = 'https://rest.bandsintown.com/artists/' + queryNormalize + '/events?app_id=https://app.swaggerhub.com/apis/Bandsintown/PublicAPI/3.0.0';
+    var queryUrl = 'https://rest.bandsintown.com/artists/' + queryNormalize + '/events?app_id=codingbootcamp';
     axios.get(queryUrl).then(
         function (response) {
             if (response.data.length === 0) {
@@ -40,7 +40,7 @@ function concertThis(userQuery) {
                     var showDate = moment(response.data[i].datetime).format("MM-DD-YYYY");
                     console.log("Name of Venue: " + venueName + "\nLocation of Show: " + venueCity + ", " + venueState + ", " + venueCountry + "\nDate of Show: " + showDate);
                     console.log("\n----------------------")
-                    fs.appendFile("log.txt", "\nName of Venue: " + venueName + "\nLocation of Show: " + venueCity + ", " + venueState + ", " + venueCountry + "\nDate of Show: " + showDate + "; ", function (err) {
+                    fs.appendFile("random.txt", "\nName of Venue: " + venueName + "\nLocation of Show: " + venueCity + ", " + venueState + ", " + venueCountry + "\nDate of Show: " + showDate + "; ", function (err) {
                         if (err) console.log(err)
                     });
                 };
