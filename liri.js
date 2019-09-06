@@ -1,32 +1,47 @@
 require("dotenv").config();
-var axios = require("axios");
+
+let axios = require("axios");
+
+let request = require('request');
+
+const keys = require("./keys.js");
+
+const moment = require("moment");
+
+const fs = require('fs');
 
 
-var keys = require("./keys.js");
+/* const Spotify = require('node-spotify-api');
+const spotify = new Spotify("keys.spotify"); */
 
-var request = require('request');
+let userInput = process.argv[2];
+let userQuery = process.argv.slice(3).join(" ");
 
-/*var Spotify = require('node-spotify-api');
-var spotify = new Spotify("keys.spotify"); */
+// APP LOGIC
+function userCommand(userInput, userQuery) {
+    switch (userInput) {
+        case "concert-this":
+            concertThis();
+            break;
+        case "spotify-this":
+            spotifyThis();
+            break;
+        case "movie-this":
+            movieThis();
+            break;
+        case "do-this":
+            doThis();
+            break;
+        default:
+            console.log("Please try again.")
+    }
+}
+userCommand(userInput, userQuery);
 
-var moment = require("moment");
-
-var fs = require('fs');
-
-var commands = ["concert-this",
-    "spotify-this-song",
-    "movie-this",
-    "do-what-it-says"
-];
-var userInput = process.argv[2];
-var userQuery = process.argv.slice(3);
-userQuery = userQuery.join(" ");
-
-
-
+// CONCERT THIS
 function concertThis(userQuery) {
-    var queryNormalize = userQuery.split(" ").join("%20");
-    var queryUrl = 'https://rest.bandsintown.com/artists/' + queryNormalize + '/events?app_id=codingbootcamp';
+
+    var queryUrl = 'https://rest.bandsintown.com/artists/' + userQuery + '/events?app_id=codingbootcamp';
     axios.get(queryUrl).then(
         function (response) {
             if (response.data.length === 0) {
@@ -47,8 +62,67 @@ function concertThis(userQuery) {
             };
         });
 };
+// spotify this
+/*function spotifyThis () {
+    console.log(`\n - - - - -\n\nSEARCHING FOR..."${userQuery}"`);
 
-//Bands In Town
-if (userInput === commands[0]) {
-    concertThis(userQuery);
+    // IF NO USER QUERY PASS VALUE OF "THW SIGN - ACE OF BASE" 
+    if (!userQuery) {
+        userQuery = "the sign ace of base"
+    };
+
+    // SPOTIFY SEARCH QUERY FORMAT
+    spotify.search({
+        type: 'track',
+        query: userQuery,
+        limit: 1
+    }, function (error, data) {
+        if (error) {
+            return console.log('Error occurred: ' + error);
+        }
+        // COLLECT SELECTED DATA IN AN ARRAY
+        let spotifyArr = data.tracks.items;
+
+        for (i = 0; i < spotifyArr.length; i++) {
+            console.log(`\nBA DA BOP!  That's for you...\n\nArtist: ${data.tracks.items[i].album.artists[0].name} \nSong: ${data.tracks.items[i].name}\nAlbum: ${data.tracks.items[i].album.name}\nSpotify link: ${data.tracks.items[i].external_urls.spotify}\n\n - - - - -`)
+        };
+    });
+}*/ 
+
+function movieThis() {
+    var queryUrl = "http://www.omdbapi.com/?t=" + userQuery + "&y=&plot=short&apikey=trilogy";
+    axios.get(queryUrl).then(
+        function (response) {
+            var dataFormat = response.data;
+            if (dataFormat.Title === undefined) {
+                axios.get("http://www.omdbapi.com/?t=mr+nobody&y=&plot=short&apikey=trilogy").then(
+                    function (response) {
+                        dataFormat = response.data;
+                        console.log("\n----------------------")
+                        console.log("Movie Tite: " + dataFormat.Title + "\nRelease Year: " + dataFormat.Year + "\nIMDB Rating: " + dataFormat.imdbRating + "\nRotten Tomatoes Rating: " + dataFormat.Ratings[1].Value + "\nProduced in: " + dataFormat.Country + "\nLanguages: " + dataFormat.Language + "\nPlot: " + dataFormat.Plot + "\nActors: " + dataFormat.Actors);
+                    });
+            } else {
+                console.log("\n----------------------")
+                console.log("Movie Tite: " + dataFormat.Title + "\nRelease Year: " + dataFormat.Year + "\nIMDB Rating: " + dataFormat.imdbRating + "\nRotten Tomatoes Rating: " + dataFormat.Ratings[1].Value + "\nProduced in: " + dataFormat.Country + "\nLanguages: " + dataFormat.Language + "\nPlot: " + dataFormat.Plot + "\nActors: " + dataFormat.Actors);
+                //append to log.txt
+                fs.appendFile("log.txt", "\nMovie Tite: " + dataFormat.Title + "\nRelease Year: " + dataFormat.Year + "\nIMDB Rating: " + dataFormat.imdbRating + "\nRotten Tomatoes Rating: " + dataFormat.Ratings[1].Value + "\nProduced in: " + dataFormat.Country + "\nLanguages: " + dataFormat.Language + "\nPlot: " + dataFormat.Plot + "\nActors: " + dataFormat.Actors + "; ", function (err) {
+                    if (err) console.log(err)
+                });
+            };;
+        }
+    );
 };
+
+function doThis() {
+    fs.readFile("random.txt", "utf8", function (err, data) {
+        if (err) throw err;
+            var randomText = data.split(",");
+        
+        if (randomText.length == 2) {
+            ask(randomText[0], randomText[1]);
+        }
+        else if (randomText.length == 1) {
+            ask(randomText[0]);
+        }
+    });
+}
